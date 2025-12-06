@@ -7,14 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Unknownzop",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^22.13.11",
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "kazagumo": "^3.3.0",
-    "shoukaku": "^4.1.1"
+    "riffy": "^1.0.8"
   }
 }
