@@ -1,6 +1,6 @@
 // config.js
 module.exports = {
-  token: process.env.DISCORD_TOKEN || "your_discord_bot_token_here",
+  token: process.env.DISCORD_TOKEN || "",
   prefix: "!",
   enablePrefix: true,
   supportServer: "https://discord.gg/9MVAPpfs8D",
