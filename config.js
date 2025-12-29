@@ -1,67 +1,66 @@
-
+// config.js
 module.exports = {
-  // Bot Configuration
-  token: process.env.DISCORD_BOT_TOKEN || '',
-  prefix: '.',
-  enablePrefix: true, // Set to false to disable prefix commands
+  token: process.env.DISCORD_TOKEN || "your_discord_bot_token_here",
+  prefix: "!",
+  enablePrefix: true,
+  supportServer: "https://discord.gg/yourinvite",
 
-  // Bot Activity
   activity: {
-    name: '/help | https://github.com/Unknownzop/MusicBot',
-    type: 'LISTENING' // PLAYING, STREAMING, LISTENING, WATCHING, COMPETING
+    name: "music",
+    type: "LISTENING" // PLAYING, LISTENING, WATCHING, STREAMING, COMPETING
   },
 
-  // Lavalink Configuration
-  lavalink: {
-    nodes: [{
-      name: 'main',
-      host: 'lava-v4.ajieblogs.eu.org',
-      port: 80,
-      password: 'https://dsc.gg/ajidevserver',
-      secure: false,
-    }],
-    defaultSearchEngine: 'youtube'
-  },
-
-  // Emojis
-  emojis: {
-    play: '▶️',
-    pause: '⏸️',
-    resume: '▶️',
-    skip: '⏭️',
-    stop: '⏹️',
-    queue: '📜',
-    shuffle: '🔀',
-    loop: '🔄',
-    volume: '🔊',
-    nowplaying: '🎵',
-    success: '✅',
-    error: '❌',
-    warning: '⚠️',
-    music: '🎵',
-    user: '👤',
-    duration: '⏱️',
-    position: '📍',
-    ping: '🏓',
-    stats: '📊',
-    invite: '📨',
-    support: '💬',
-    uptime: '⌚',
-    servers: '🌐',
-    users: '👥',
-    players: '🎵',
-    playlist: '📋'
-  },
-
-  // URLs
-  urls: {
-    support: process.env.SUPPORT_SERVER || 'https://discord.gg/your-support-server',
-    github: 'https://github.com/Unknownzop/MusicBot'
-  },
-
-  // Express Server
   express: {
-    port: 5000,
-    host: '0.0.0.0'
+    enabled: true,
+    port: 3000
+  },
+
+  emojis: {
+    play: "▶️",
+    pause: "⏸️",
+    stop: "⏹️",
+    skip: "⏭️",
+    queue: "📜",
+    music: "🎵",
+    loop: "🔁",
+    shuffle: "🔀",
+    volume: "🔊",
+    success: "✅",
+    error: "❌",
+    info: "ℹ️"
+  },
+
+  aliases: {
+    play: ['p'],
+    pause: ['pa'],
+    resume: ['r', 'res'],
+    skip: ['s', 'next'],
+    stop: ['st', 'leave', 'disconnect'],
+    volume: ['v', 'vol'],
+    queue: ['q'],
+    nowplaying: ['np', 'current'],
+    shuffle: ['sh', 'mix'],
+    loop: ['l', 'repeat'],
+    remove: ['rm', 'delete'],
+    move: ['mv'],
+    clearqueue: ['cq', 'clear'],
+    '247': ['24/7', 'stay'],
+    stats: ['status', 'info'],
+    ping: ['latency'],
+    invite: ['inv'],
+    support: ['server'],
+    help: ['h', 'commands', 'cmd']
+  },
+
+  lavalink: {
+    nodes: [
+      {
+        name: "Main Node",
+        host: "lavalink.jirayu.net",
+        port: 13592,
+        password: "youshallnotpass",
+        secure: false
+      }
+    ]
   }
 };
