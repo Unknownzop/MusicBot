@@ -5,45 +5,50 @@ const config = require('./config.js');
 const express = require('express');
 require('dotenv').config();
 
-// Express server setup
-if (config.express.enabled) {
-  const app = express();
+// Function to start Express server
+function startExpressServer() {
+  if (config.express.enabled) {
+    const app = express();
 
-  app.get('/', (req, res) => {
-    res.json({
-      status: 'online',
-      bot: client.user ? client.user.tag : 'Starting...',
-      servers: client.guilds ? client.guilds.cache.size : 0,
-      uptime: process.uptime(),
-      lavalink: isLavalinkConnected ? 'connected' : 'disconnected'
+    app.get('/', (req, res) => {
+      res.json({
+        status: 'online',
+        bot: client.user ? client.user.tag : 'Starting...',
+        servers: client.guilds ? client.guilds.cache.size : 0,
+        uptime: process.uptime(),
+        lavalink: isLavalinkConnected ? 'connected' : 'disconnected'
+      });
     });
-  });
 
-  app.get('/stats', (req, res) => {
-    res.json({
-      guilds: client.guilds ? client.guilds.cache.size : 0,
-      users: client.guilds ? client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0) : 0,
-      players: riffy.players ? riffy.players.size : 0,
-      uptime: process.uptime(),
-      memory: process.memoryUsage().heapUsed / 1024 / 1024,
-      ping: client.ws ? client.ws.ping : 0,
-      lavalink: isLavalinkConnected
+    app.get('/stats', (req, res) => {
+      res.json({
+        guilds: client.guilds ? client.guilds.cache.size : 0,
+        users: client.guilds ? client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0) : 0,
+        players: riffy.players ? riffy.players.size : 0,
+        uptime: process.uptime(),
+        memory: process.memoryUsage().heapUsed / 1024 / 1024,
+        ping: client.ws ? client.ws.ping : 0,
+        lavalink: isLavalinkConnected
+      });
     });
-  });
 
-  app.listen(config.express.port, () => {
-    console.log(`🌐 Express server running on port ${config.express.port}`);
-  });
+    app.listen(config.express.port, () => {
+      console.log(`🌐 Express server running on port ${config.express.port}`);
+    });
+  }
 }
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
-});
+const intents = [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildVoiceStates,
+  GatewayIntentBits.GuildMessages
+];
+
+if (config.enablePrefix) {
+  intents.push(GatewayIntentBits.MessageContent);
+}
+
+const client = new Client({ intents });
 
 let isLavalinkConnected = false;
 
@@ -78,6 +83,9 @@ client.on('ready', async () => {
   const activityType = activityTypes[config.activity.type] || ActivityType.Listening;
   client.user.setActivity(config.activity.name, { type: activityType });
   console.log(`${config.emojis.success} Activity set: ${config.activity.type} ${config.activity.name}`);
+
+  // Start Express server after bot is ready
+  startExpressServer();
 
   const commands = [
     { name: 'play', description: 'Play a song', options: [{ name: 'query', description: 'Song name or URL', type: 3, required: true }] },
@@ -1259,4 +1267,4 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       client.login(config.token);
-     
+
