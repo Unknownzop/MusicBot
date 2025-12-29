@@ -22,7 +22,7 @@ A powerful and easy-to-use Discord music bot with support for YouTube, Spotify, 
 
 4. Set up environment variables  
    ``cp .env.example .env``  
-   Edit ``.env`` with your Discord bot token and other required values
+   Edit ``.env`` with your Discord bot token
 
 5. (Optional) Customize settings in  
    ``config.js``
