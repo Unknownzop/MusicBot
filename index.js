@@ -14,7 +14,7 @@ function startExpressServer() {
       res.json({
         status: 'online',
         bot: client.user ? client.user.tag : 'Starting...',
-        servers: client.guilds ? client.guilds.cache.size : 0,
+        servers: client.guilds.cache ? client.guilds.cache.size : 0,
         uptime: process.uptime(),
         lavalink: isLavalinkConnected ? 'connected' : 'disconnected'
       });
@@ -22,8 +22,8 @@ function startExpressServer() {
 
     app.get('/stats', (req, res) => {
       res.json({
-        guilds: client.guilds ? client.guilds.cache.size : 0,
-        users: client.guilds ? client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0) : 0,
+        guilds: client.guilds.cache ? client.guilds.cache.size : 0,
+        users: client.guilds.cache ? client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0) : 0,
         players: riffy.players ? riffy.players.size : 0,
         uptime: process.uptime(),
         memory: process.memoryUsage().heapUsed / 1024 / 1024,
@@ -32,11 +32,14 @@ function startExpressServer() {
       });
     });
 
-    app.listen(config.express.port, () => {
+    app.listen(config.express.port, '0.0.0.0', () => {
       console.log(`🌐 Express server running on port ${config.express.port}`);
     });
   }
 }
+
+// Start Express server before bot
+startExpressServer();
 
 const intents = [
   GatewayIntentBits.Guilds,
@@ -61,6 +64,35 @@ const riffy = new Riffy(client, config.lavalink.nodes, {
   restVersion: "v4"
 });
 
+// Fix Riffy Node initialization error by overriding the broken defineProperty call
+// This is a workaround for the riffy package bug mentioned in the error
+const { Node } = require('riffy/build/structures/Node');
+const originalDefineProperty = Object.defineProperty;
+Object.defineProperty = function(obj, prop, descriptor) {
+    if (obj instanceof Node && (prop === 'host' || prop === 'port' || prop === 'password' || prop === 'secure' || prop === 'identifier')) {
+        return originalDefineProperty(obj, prop, {
+            value: descriptor.value,
+            writable: true,
+            enumerable: true,
+            configurable: true
+        });
+    }
+    try {
+        return originalDefineProperty(obj, prop, descriptor);
+    } catch (e) {
+        // If it fails with the specific error, try a fallback
+        if (e instanceof TypeError && e.message.includes('Invalid property descriptor')) {
+            return originalDefineProperty(obj, prop, {
+                value: descriptor.value,
+                writable: true,
+                enumerable: true,
+                configurable: true
+            });
+        }
+        throw e;
+    }
+};
+
 const queue247 = new Set();
 
 client.on('ready', async () => {
@@ -83,9 +115,6 @@ client.on('ready', async () => {
   const activityType = activityTypes[config.activity.type] || ActivityType.Listening;
   client.user.setActivity(config.activity.name, { type: activityType });
   console.log(`${config.emojis.success} Activity set: ${config.activity.type} ${config.activity.name}`);
-
-  // Start Express server after bot is ready
-  startExpressServer();
 
   const commands = [
     { name: 'play', description: 'Play a song', options: [{ name: 'query', description: 'Song name or URL', type: 3, required: true }] },
