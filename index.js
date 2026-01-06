@@ -964,7 +964,7 @@ client.on('interactionCreate', async (interaction) => {
                 );
 
                 await message.reply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
-              } else {
+              } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
                 const track = resolve.tracks[0];
                 track.info.requester = message.author.id;
                 player.queue.add(track);
@@ -976,6 +976,8 @@ client.on('interactionCreate', async (interaction) => {
                 );
 
                 await message.reply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
+              } else {
+                return message.reply(`${config.emojis.error} No results found`);
               }
 
               if (!player.playing && !player.paused) player.play();
