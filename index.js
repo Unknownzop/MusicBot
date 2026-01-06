@@ -238,6 +238,11 @@ function createNowPlayingContainer(player, track, disabled = false) {
             .setCustomId('shuffle')
             .setEmoji(config.emojis.shuffle)
             .setStyle(ButtonStyle.Secondary)
+            .setDisabled(disabled),
+          new ButtonBuilder()
+            .setCustomId('queue')
+            .setEmoji(config.emojis.queue)
+            .setStyle(ButtonStyle.Secondary)
             .setDisabled(disabled)
         )
     )
@@ -570,7 +575,7 @@ client.on('interactionCreate', async (interaction) => {
         );
 
         await interaction.editReply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
-      } else {
+      } else if (resolve.loadType === 'search' || resolve.loadType === 'track') {
         const track = resolve.tracks[0];
         track.info.requester = member.user.id;
         player.queue.add(track);
@@ -582,6 +587,8 @@ client.on('interactionCreate', async (interaction) => {
         );
 
         await interaction.editReply({ components: [container], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 });
+      } else {
+        return interaction.editReply({ content: `${config.emojis.error} No results found` });
       }
 
       if (!player.playing && !player.paused) player.play();
@@ -1296,4 +1303,3 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       client.login(config.token);
-
