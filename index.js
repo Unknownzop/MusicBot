@@ -126,7 +126,7 @@ client.on('ready', async () => {
     { name: 'queue', description: 'Show the current queue' },
     { name: 'nowplaying', description: 'Show currently playing song' },
     { name: 'shuffle', description: 'Shuffle the queue' },
-    { name: 'loop', description: 'Toggle loop mode', options: [{ name: 'mode', description: 'Loop mode', type: 3, required: true, choices: [{ name: 'Off', value: 'off' }, { name: 'Track', value: 'track' }, { name: 'Queue', value: 'queue' }] }] },
+    { name: 'loop', description: 'Toggle loop mode', options: [{ name: 'mode', description: 'Loop mode', type: 3, required: true, choices: [{ name: 'Off', value: 'none' }, { name: 'Track', value: 'track' }, { name: 'Queue', value: 'queue' }] }] },
     { name: 'remove', description: 'Remove a song from queue', options: [{ name: 'position', description: 'Position in queue', type: 4, required: true, min_value: 1 }] },
     { name: 'move', description: 'Move a song in queue', options: [{ name: 'from', description: 'From position', type: 4, required: true, min_value: 1 }, { name: 'to', description: 'To position', type: 4, required: true, min_value: 1 }] },
     { name: 'clearqueue', description: 'Clear the queue' },
@@ -252,7 +252,7 @@ function createNowPlayingContainer(player, track, disabled = false) {
           new ButtonBuilder()
             .setCustomId('loop')
             .setEmoji(config.emojis.loop)
-            .setStyle(ButtonStyle.Secondary)
+            .setStyle(player.loop && player.loop !== 'none' ? ButtonStyle.Success : ButtonStyle.Secondary)
             .setDisabled(disabled)
         )
     );
@@ -321,7 +321,7 @@ function createQueueContainer(player, guild, user) {
     description = 'The queue is currently empty.';
   }
 
-  description += `\n\n**Loop:** ${player.loop || 'off'} | **Total:** ${player.queue.length + 1} tracks`;
+  description += `\n\n**Loop:** ${(!player.loop || player.loop === 'none') ? 'off' : player.loop} | **Total:** ${player.queue.length + 1} tracks`;
 
   let thumbnail = client.user.displayAvatarURL({ size: 1024 });
 
@@ -511,11 +511,19 @@ client.on('interactionCreate', async (interaction) => {
       }
 
       case 'loop': {
-        const modes = ['off', 'track', 'queue'];
-        const currentMode = player.loop || 'off';
+        const modes = ['none', 'track', 'queue'];
+        const currentMode = player.loop || 'none';
         const nextMode = modes[(modes.indexOf(currentMode) + 1) % modes.length];
         player.setLoop(nextMode);
-        await interaction.reply({ content: `${config.emojis.loop} Loop set to: ${nextMode}`, ephemeral: true });
+        const loopLabel = nextMode === 'none' ? 'off' : nextMode;
+
+        const loopMsg = nowPlayingMessages.get(player.guildId);
+        if (loopMsg && player.current) {
+          const updatedContainer = createNowPlayingContainer(player, player.current);
+          await loopMsg.edit({ components: [updatedContainer], flags: MessageFlags.IsPersistent | MessageFlags.IsComponentsV2 }).catch(() => {});
+        }
+
+        await interaction.reply({ content: `${config.emojis.loop} Loop set to: ${loopLabel}`, ephemeral: true });
         break;
       }
 
@@ -702,7 +710,7 @@ client.on('interactionCreate', async (interaction) => {
     const totalDuration = info.length || 0;
     const status = player.paused ? '⏸️ Paused' : '▶️ Playing';
 
-          const description = `**[${info.title || 'Unknown Title'}](${info.uri || 'https://youtube.com'})**\n\n**Status:** ${status}\n**Current Duration:** ${formatTime(currentPosition)} / ${formatTime(totalDuration)}\n**Requested By:** <@${player.current.info.requester}>\n**Loop:** ${player.loop || 'off'}`;
+          const description = `**[${info.title || 'Unknown Title'}](${info.uri || 'https://youtube.com'})**\n\n**Status:** ${status}\n**Current Duration:** ${formatTime(currentPosition)} / ${formatTime(totalDuration)}\n**Requested By:** <@${player.current.info.requester}>\n**Loop:** ${(!player.loop || player.loop === 'none') ? 'off' : player.loop}`;
 
           const container = new ContainerBuilder()
             .addSectionComponents(
@@ -1095,7 +1103,7 @@ client.on('interactionCreate', async (interaction) => {
             const totalDuration = info.length || 0;
             const status = player.paused ? '⏸️ Paused' : '▶️ Playing';
 
-            const description = `**[${info.title || 'Unknown Title'}](${info.uri || 'https://youtube.com'})**\n\n**Status:** ${status}\n**Current Duration:** ${formatTime(currentPosition)} / ${formatTime(totalDuration)}\n**Requested By:** <@${player.current.info.requester}>\n**Loop:** ${player.loop || 'off'}`;
+            const description = `**[${info.title || 'Unknown Title'}](${info.uri || 'https://youtube.com'})**\n\n**Status:** ${status}\n**Current Duration:** ${formatTime(currentPosition)} / ${formatTime(totalDuration)}\n**Requested By:** <@${player.current.info.requester}>\n**Loop:** ${(!player.loop || player.loop === 'none') ? 'off' : player.loop}`;
 
             const container = new ContainerBuilder()
               .addSectionComponents(
