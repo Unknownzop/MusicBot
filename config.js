@@ -6,7 +6,7 @@ module.exports = {
   supportServer: "https://discord.gg/9MVAPpfs8D",
 
   activity: {
-    name: "music",
+    name: "/help",
     type: "LISTENING" // PLAYING, LISTENING, WATCHING, STREAMING, COMPETING
   },
 
@@ -56,9 +56,9 @@ module.exports = {
     nodes: [
       {
         name: "Main Node",
-        host: "lavalink.jirayu.net",
-        port: 13592,
-        password: "youshallnotpass",
+        host: "lavalinkv4.serenetia.com",
+        port: 80,
+        password: "https://seretia.link/discord",
         secure: false
       }
     ]
